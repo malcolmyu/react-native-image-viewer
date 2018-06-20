@@ -18,6 +18,8 @@ import ImageZoom from 'react-native-image-pan-zoom';
 import styles from './image-viewer.style';
 import { IImageInfo, IImageSize, Props, State } from './image-viewer.type';
 
+const isRTL: boolean = I18nManager ? I18nManager.isRTL : false;
+
 export default class ImageViewer extends React.Component<Props, State> {
   public static defaultProps = new Props();
   public state = new State();
@@ -201,7 +203,7 @@ export default class ImageViewer extends React.Component<Props, State> {
     this.positionXNumber = this.standardPositionX + offsetX;
     this.positionX.setValue(this.positionXNumber);
 
-    const offsetXRTL = !I18nManager.isRTL ? offsetX : -offsetX;
+    const offsetXRTL = !isRTL ? offsetX : -offsetX;
 
     if (offsetXRTL < 0) {
       if (this!.state!.currentShowIndex || 0 < this.props.imageUrls.length - 1) {
@@ -218,11 +220,11 @@ export default class ImageViewer extends React.Component<Props, State> {
    * 手势结束，但是没有取消浏览大图
    */
   public handleResponderRelease = (vx: number = 0) => {
-    const vxRTL = I18nManager.isRTL ? -vx : vx;
-    const isLeftMove = I18nManager.isRTL
+    const vxRTL = isRTL ? -vx : vx;
+    const isLeftMove = isRTL
       ? this.positionXNumber - this.standardPositionX < -(this.props.flipThreshold || 0)
       : this.positionXNumber - this.standardPositionX > (this.props.flipThreshold || 0);
-    const isRightMove = I18nManager.isRTL
+    const isRightMove = isRTL
       ? this.positionXNumber - this.standardPositionX > (this.props.flipThreshold || 0)
       : this.positionXNumber - this.standardPositionX < -(this.props.flipThreshold || 0);
 
@@ -268,7 +270,7 @@ export default class ImageViewer extends React.Component<Props, State> {
       return;
     }
 
-    this.positionXNumber = !I18nManager.isRTL
+    this.positionXNumber = !isRTL
       ? this.standardPositionX + this.width
       : this.standardPositionX - this.width;
     this.standardPositionX = this.positionXNumber;
@@ -301,7 +303,7 @@ export default class ImageViewer extends React.Component<Props, State> {
       return;
     }
 
-    this.positionXNumber = !I18nManager.isRTL
+    this.positionXNumber = !isRTL
       ? this.standardPositionX - this.width
       : this.standardPositionX + this.width;
     this.standardPositionX = this.positionXNumber;
@@ -413,6 +415,11 @@ export default class ImageViewer extends React.Component<Props, State> {
 
       let width = this!.state!.imageSizes![index] && this!.state!.imageSizes![index].width;
       let height = this.state.imageSizes![index] && this.state.imageSizes![index].height;
+      let scale = 1;
+
+      const ww = width;
+      const hh = height;
+
       const imageInfo = this.state.imageSizes![index];
 
       if (!imageInfo || !imageInfo.status) {
@@ -424,6 +431,7 @@ export default class ImageViewer extends React.Component<Props, State> {
         const widthPixel = screenWidth / width;
         width *= widthPixel;
         height *= widthPixel;
+        scale = widthPixel;
       }
 
       // 如果此时高度还大于屏幕高度,整体缩放到高度是屏幕高度
@@ -431,6 +439,7 @@ export default class ImageViewer extends React.Component<Props, State> {
         const HeightPixel = screenHeight / height;
         width *= HeightPixel;
         height *= HeightPixel;
+        scale = HeightPixel;
       }
 
       const Wrapper = ({ children, ...others }: any) => (
@@ -445,6 +454,7 @@ export default class ImageViewer extends React.Component<Props, State> {
           onDoubleClick={this.handleDoubleClick}
           enableSwipeDown={true}
           onSwipeDown={this.handleSwipeDown}
+          scale={1}
           {...others}
         >
           {children}
@@ -477,8 +487,8 @@ export default class ImageViewer extends React.Component<Props, State> {
           image.props.style = {
             ...this.styles.imageStyle, // User config can override above.
             ...image.props.style,
-            width,
-            height
+            width: ww,
+            height: hh
           };
 
           if (typeof image.props.source === 'number') {
@@ -508,6 +518,10 @@ export default class ImageViewer extends React.Component<Props, State> {
               imageHeight={height}
               enableSwipeDown={true}
               onSwipeDown={this.handleSwipeDown}
+              // tslint:disable-next-line
+              scale={scale}
+              minScale={0.1}
+              maxScale={10}
             >
               {this!.props!.renderImage!(image.props)}
             </ImageZoom>
