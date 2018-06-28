@@ -431,7 +431,7 @@ export default class ImageViewer extends React.Component<Props, State> {
         const widthPixel = screenWidth / width;
         width *= widthPixel;
         height *= widthPixel;
-        scale = widthPixel;
+        scale *= widthPixel;
       }
 
       // 如果此时高度还大于屏幕高度,整体缩放到高度是屏幕高度
@@ -439,7 +439,7 @@ export default class ImageViewer extends React.Component<Props, State> {
         const HeightPixel = screenHeight / height;
         width *= HeightPixel;
         height *= HeightPixel;
-        scale = HeightPixel;
+        scale *= HeightPixel;
       }
 
       const Wrapper = ({ children, ...others }: any) => (
@@ -447,6 +447,7 @@ export default class ImageViewer extends React.Component<Props, State> {
           cropWidth={this.width}
           cropHeight={this.height}
           maxOverflow={this.props.maxOverflow}
+          enableHorizontalBounce
           horizontalOuterRangeOffset={this.handleHorizontalOuterRangeOffset}
           responderRelease={this.handleResponderRelease}
           onLongPress={this.handleLongPressWithIndex.get(index)}
@@ -488,8 +489,17 @@ export default class ImageViewer extends React.Component<Props, State> {
             ...this.styles.imageStyle, // User config can override above.
             ...image.props.style,
             width: ww,
-            height: hh
+            height: hh,
           };
+
+
+          if (scale > 0 && scale < 1) {
+            image.props.style.transform = [
+              { scale },
+              { translateX: - (1 - scale) * ww / (scale * 2) },
+              { translateY: - (1 - scale) * hh / (scale * 2) }
+            ];
+          }
 
           if (typeof image.props.source === 'number') {
             // source = require(..), doing nothing
@@ -509,8 +519,9 @@ export default class ImageViewer extends React.Component<Props, State> {
               cropWidth={this.width}
               cropHeight={this.height}
               maxOverflow={this.props.maxOverflow}
+              enableHorizontalBounce
               horizontalOuterRangeOffset={this.handleHorizontalOuterRangeOffset}
-              responderRelease={this.handleResponderRelease}
+              responderRelease={(vx) => this.handleResponderRelease(vx, scale)}
               onLongPress={this.handleLongPressWithIndex.get(index)}
               onClick={this.handleClick}
               onDoubleClick={this.handleDoubleClick}
