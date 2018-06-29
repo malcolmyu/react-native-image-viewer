@@ -19,7 +19,7 @@
   "author": "ascoders",
   "license": "MIT",
   "dependencies": {
-    "@wnpm/react-native-image-pan-zoom": "2.2.0"
+    "@wnpm/react-native-image-pan-zoom": "^2.2.1"
   },
   "peerDependencies": {
     "react": "*",

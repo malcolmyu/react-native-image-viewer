@@ -455,7 +455,6 @@ export default class ImageViewer extends React.Component<Props, State> {
           onDoubleClick={this.handleDoubleClick}
           enableSwipeDown={true}
           onSwipeDown={this.handleSwipeDown}
-          scale={1}
           {...others}
         >
           {children}
@@ -485,13 +484,13 @@ export default class ImageViewer extends React.Component<Props, State> {
           if (!image.props.style) {
             image.props.style = {};
           }
+          
           image.props.style = {
             ...this.styles.imageStyle, // User config can override above.
             ...image.props.style,
             width: ww,
             height: hh,
           };
-
 
           if (scale > 0 && scale < 1) {
             image.props.style.transform = [
@@ -529,9 +528,7 @@ export default class ImageViewer extends React.Component<Props, State> {
               imageHeight={height}
               enableSwipeDown={true}
               onSwipeDown={this.handleSwipeDown}
-              // tslint:disable-next-line
-              scale={scale}
-              minScale={0.1}
+              minScale={0.6}
               maxScale={10}
             >
               {this!.props!.renderImage!(image.props)}
